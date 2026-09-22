@@ -7,13 +7,19 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .models import ConfirmationCode, CustomUser
 from .serializers import (
     AuthValidateSerializer,
     ConfirmationSerializer,
+    CustomTokenObtainPairSerializer,
     RegisterValidateSerializer,
 )
+
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
 
 
 class AuthorizationAPIView(CreateAPIView):
