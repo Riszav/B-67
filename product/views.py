@@ -9,6 +9,7 @@ from rest_framework.viewsets import ModelViewSet
 
 from common.permissions import CanEdit, IsAnonymous, IsOwner
 
+from django.core.cache import cache
 from .models import Category, Product, Review
 from .serializers import (
     CategorySerializer,
@@ -103,6 +104,17 @@ class ProductListCreateAPIView(ListCreateAPIView):
         return Response(
             data=ProductSerializer(product).data, status=status.HTTP_201_CREATED
         )
+
+    def get(self, request, *args, **kwargs):
+        cached_data = cache.get("product_list")
+        if cached_data:
+            print("Redis " * 20)
+            return Response(data=cached_data, status=status.HTTP_200_OK)
+        response = super().get(self, request, *args, **kwargs)
+        print("Postgres " * 20)
+        if response.data.get("total", 0) > 0:
+            cache.set("product_list", response.data, timeout=30)
+        return response
 
 
 class ProductDetailAPIView(RetrieveUpdateDestroyAPIView):
