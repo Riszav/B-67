@@ -1,5 +1,6 @@
 from collections import OrderedDict
 
+from django.core.cache import cache
 from rest_framework import status
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.pagination import PageNumberPagination
@@ -9,7 +10,6 @@ from rest_framework.viewsets import ModelViewSet
 
 from common.permissions import CanEdit, IsAnonymous, IsOwner
 
-from django.core.cache import cache
 from .models import Category, Product, Review
 from .serializers import (
     CategorySerializer,
@@ -20,6 +20,7 @@ from .serializers import (
     ReviewSerializer,
     ReviewValidateSerializer,
 )
+from .tasks import add
 
 PAGE_SIZE = 5
 
@@ -106,6 +107,10 @@ class ProductListCreateAPIView(ListCreateAPIView):
         )
 
     def get(self, request, *args, **kwargs):
+        # from time import sleep
+
+        # sleep(15)
+        add.delay(5, 7)
         cached_data = cache.get("product_list")
         if cached_data:
             print("Redis " * 20)
